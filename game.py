@@ -95,6 +95,7 @@ monsters = []
 monster_spawn_time = random.uniform(0.2, 3)
 timer = 0
 score_text_color = (255, 255, 255)
+high_score_text_color = (255, 255, 255)
 
 clock = pygame.time.Clock()
 
@@ -123,6 +124,7 @@ while running:
                     monsters.clear()
                     ship.y = 100
                     ship.score = 0
+                    high_score_text_color = (255, 255, 255)
                     continue
 
                 new_bullet = ship.spawn_bullet()
@@ -162,6 +164,7 @@ while running:
                     with open('high-score.txt', 'w') as file:
                         file.write(str(ship.score))
                         ship.high_score = ship.score
+                        high_score_text_color = (0, 255, 0)
 
     if timer > monster_spawn_time and not player_has_died:
         monster_spawn_time = random.uniform(0.2, 3)
@@ -191,6 +194,9 @@ while running:
     font = pygame.font.SysFont('Arial', 32)
     ship_score_text = font.render('Score: '+str(ship.score), True, score_text_color)
     screen.blit(ship_score_text, (20, 20))
+
+    ship_high_score_text = font.render('Hi: '+str(ship.high_score), True, high_score_text_color)
+    screen.blit(ship_high_score_text, (20, 60))
 
     pygame.display.flip()
  
