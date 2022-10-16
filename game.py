@@ -13,6 +13,13 @@ class Ship:
         self.speed = 250
         self.direction = 1
 
+        self.score = 0
+        with open('high-score.txt', 'a+') as file:
+            try:
+                self.high_score = int(file.readline())
+            except:
+                self.high_score = 0
+
         self.image = pygame.image.load('res/ship.png')
         size_x, size_y = self.image.get_size()
         self.image = pygame.transform.smoothscale(self.image, (size_x/2.5, size_y/2.5))
@@ -87,6 +94,7 @@ bullets = []
 monsters = []
 monster_spawn_time = random.uniform(0.2, 3)
 timer = 0
+score_text_color = (255, 255, 255)
 
 clock = pygame.time.Clock()
 
@@ -114,6 +122,7 @@ while running:
                     player_has_died = False
                     monsters.clear()
                     ship.y = 100
+                    ship.score = 0
                     continue
 
                 new_bullet = ship.spawn_bullet()
@@ -133,18 +142,26 @@ while running:
             if bullet.rect.colliderect(monster.hitbox):
                 monsters.remove(monster)
                 bullets.remove(bullet)
+                ship.score += 500
+                score_text_color = (0, 255, 0)
 
     for monster in monsters:
         monster.update(delta)
         monster.draw(screen)
         if monster.x < -200:
             monsters.remove(monster)
+            ship.score -= 200
+            score_text_color = (255, 0, 0)
 
         if monster.hitbox.colliderect(ship.hitbox):
             if player_has_died:
                 monsters.remove(monster)
-            else: 
+            else:
                 player_has_died = True
+                if ship.score > ship.high_score:
+                    with open('high-score.txt', 'w') as file:
+                        file.write(str(ship.score))
+                        ship.high_score = ship.score
 
     if timer > monster_spawn_time and not player_has_died:
         monster_spawn_time = random.uniform(0.2, 3)
@@ -156,14 +173,24 @@ while running:
     if player_has_died:
         font = pygame.font.SysFont('Arial', 128)
         
-        you_died_text = font.render('YOU DIED!', 0, (255, 0, 0))
+        you_died_text = font.render('YOU DIED!', True, (255, 0, 0))
         text_rect = you_died_text.get_rect()
         screen.blit(you_died_text, (800/2 - text_rect.w/2, 600/2 - text_rect.h/2 - 150))
 
         font = pygame.font.SysFont('Arial', 32)
-        restart_instructions_text = font.render('Press Enter or Spacebar to restart', 0, (255, 0, 0))
+        restart_instructions_text = font.render('Press Enter or Spacebar to restart', True, (255, 0, 0))
         text_rect = restart_instructions_text.get_rect()
         screen.blit(restart_instructions_text, (800/2 - text_rect.w/2, 600/2 + text_rect.h/2))
+
+        if ship.score == ship.high_score:
+            font = pygame.font.SysFont('Arial', 24)
+            high_score_text = font.render('NEW HIGH SCORE! ' + str(ship.high_score), True, (0, 255, 0))
+            text_rect = high_score_text.get_rect()
+            screen.blit(high_score_text, (800/2 - text_rect.w/2, 600/2 + text_rect.h/2 + 100))
+
+    font = pygame.font.SysFont('Arial', 32)
+    ship_score_text = font.render('Score: '+str(ship.score), True, score_text_color)
+    screen.blit(ship_score_text, (20, 20))
 
     pygame.display.flip()
  
