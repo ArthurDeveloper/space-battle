@@ -1,6 +1,8 @@
 import pygame
 import random
 
+debug_mode = False
+
 class Ship:
     def __init__(self):
         self.x = 10
@@ -13,15 +15,21 @@ class Ship:
         size_x, size_y = self.image.get_size()
         self.image = pygame.transform.smoothscale(self.image, (size_x/2.5, size_y/2.5))
 
+        self.hitbox = pygame.Rect(self.x, self.y, size_x/2.5, size_y/2.5)
+
     def spawn_bullet(self):
         size_x, size_y = self.image.get_size()
         new_bullet = Bullet(self.x + size_x - 20, self.y + size_y - 10)
         return new_bullet
 
     def update(self, delta):
-        self.y += self.speed * self.direction * delta
+        if not paused:
+            self.y += self.speed * self.direction * delta
+            self.hitbox.y = self.y
 
     def draw(self, screen):
+        if debug_mode:
+            pygame.draw.rect(screen, (255, 0, 0), self.hitbox)
         screen.blit(self.image, (self.x, self.y))
 
 
@@ -33,7 +41,8 @@ class Bullet:
         self.speed = 500
 
     def update(self, delta):
-        self.x += 500 * delta
+        if not paused:
+            self.x += 500 * delta
 
     def draw(self, screen):
         pygame.draw.rect(screen, (255, 255, 0), (self.x, self.y, 50, 10))
@@ -50,10 +59,16 @@ class Monster:
         size_x, size_y = self.image.get_size()
         self.image = pygame.transform.smoothscale(self.image, (size_x/2.5, size_y/2.5))
 
+        self.hitbox = pygame.Rect(self.x, self.y, size_x/2.5, size_y/2.5)
+
     def update(self, delta):
-        self.x -= self.speed * delta
+        if not paused:
+            self.x -= self.speed * delta
+            self.hitbox.x = self.x
 
     def draw(self, screen):
+        if debug_mode:
+            pygame.draw.rect(screen, (255, 0, 0), self.hitbox)
         screen.blit(self.image, (self.x, self.y))
 
 
@@ -70,6 +85,7 @@ timer = 0
 clock = pygame.time.Clock()
 
 running = True
+paused = False
 while running:
     delta = clock.tick(60) / 1000
 
@@ -107,13 +123,15 @@ while running:
         if monster.x < -200:
             monsters.remove(monster)
 
+        if monster.hitbox.colliderect(ship.hitbox):
+            paused = True
+
     if timer > monster_spawn_time:
         monster_spawn_time = random.uniform(0.2, 3)
         timer = 0
 
         new_monster = Monster(900, random.randint(0, 600))
         monsters.append(new_monster)
-
 
     pygame.display.flip()
 
