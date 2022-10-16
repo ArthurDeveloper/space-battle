@@ -35,6 +35,10 @@ class Ship:
         if not player_has_died:
             self.y += self.speed * self.direction * delta
             self.hitbox.y = self.y
+            if self.y < 50:
+                self.y = 50
+            if self.y > 450:
+                self.y = 450
 
     def draw(self, screen):
         if debug_mode:
