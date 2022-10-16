@@ -74,7 +74,7 @@ while running:
         bullet.update(delta)
         bullet.draw(screen)
         if bullet.x > 800:
-            bullets.remove(bullets.index(bullet))
+            bullets.remove(bullet)
 
     pygame.display.flip()
 
