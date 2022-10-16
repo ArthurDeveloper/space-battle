@@ -23,7 +23,7 @@ class Ship:
         return new_bullet
 
     def update(self, delta):
-        if not paused:
+        if not player_has_died:
             self.y += self.speed * self.direction * delta
             self.hitbox.y = self.y
 
@@ -41,7 +41,7 @@ class Bullet:
         self.speed = 500
 
     def update(self, delta):
-        if not paused:
+        if not player_has_died:
             self.x += 500 * delta
 
     def draw(self, screen):
@@ -62,7 +62,7 @@ class Monster:
         self.hitbox = pygame.Rect(self.x, self.y, size_x/2.5, size_y/2.5)
 
     def update(self, delta):
-        if not paused:
+        if not player_has_died:
             self.x -= self.speed * delta
             self.hitbox.x = self.x
 
@@ -85,7 +85,7 @@ timer = 0
 clock = pygame.time.Clock()
 
 running = True
-paused = False
+player_has_died = False
 while running:
     delta = clock.tick(60) / 1000
 
@@ -124,14 +124,18 @@ while running:
             monsters.remove(monster)
 
         if monster.hitbox.colliderect(ship.hitbox):
-            paused = True
+            player_has_died = True
 
-    if timer > monster_spawn_time:
+    if timer > monster_spawn_time and not player_has_died:
         monster_spawn_time = random.uniform(0.2, 3)
         timer = 0
 
         new_monster = Monster(900, random.randint(0, 600))
         monsters.append(new_monster)
+
+    #if player_has_died:
+     #   font = pygame.font.SysFont('Arial')
+
 
     pygame.display.flip()
 
