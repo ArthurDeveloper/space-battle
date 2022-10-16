@@ -12,6 +12,11 @@ class Ship:
         size_x, size_y = self.image.get_size()
         self.image = pygame.transform.smoothscale(self.image, (size_x/2.5, size_y/2.5))
 
+    def spawn_bullet(self):
+        size_x, size_y = self.image.get_size()
+        new_bullet = Bullet(self.x + size_x - 20, self.y + size_y - 10)
+        return new_bullet
+
     def update(self, delta):
         self.y += self.speed * self.direction * delta
 
@@ -19,11 +24,26 @@ class Ship:
         screen.blit(self.image, (self.x, self.y))
 
 
+class Bullet:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+        self.speed = 500
+
+    def update(self, delta):
+        self.x += 500 * delta
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, (255, 255, 0), (self.x, self.y, 50, 10))
+
+
 screen = pygame.display.set_mode((800, 600))
 
 pygame.display.set_caption('Space Battle!')
 
 ship = Ship()
+bullets = []
 
 clock = pygame.time.Clock()
 
@@ -42,11 +62,19 @@ while running:
             elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 ship.direction = 1
 
+            if event.key == pygame.K_RETURN:
+                new_bullet = ship.spawn_bullet()
+                bullets.append(new_bullet)
 
     screen.fill((0, 0, 0, 255))
 
     ship.update(delta)
     ship.draw(screen)
+    for bullet in bullets:
+        bullet.update(delta)
+        bullet.draw(screen)
+        if bullet.x > 800:
+            bullets.remove(bullets.indexOf(bullet))
 
     pygame.display.flip()
 
