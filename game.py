@@ -41,13 +41,17 @@ class Bullet:
         self.y = y
 
         self.speed = 500
+        
+        self.rect = pygame.Rect((self.x, self.y, 50, 10))
 
     def update(self, delta):
         if not player_has_died:
             self.x += 500 * delta
 
+        self.rect.x = self.x
+
     def draw(self, screen):
-        pygame.draw.rect(screen, (255, 255, 0), (self.x, self.y, 50, 10))
+        pygame.draw.rect(screen, (255, 255, 0), self.rect)
 
 
 class Monster:
@@ -124,6 +128,11 @@ while running:
         bullet.draw(screen)
         if bullet.x > 800:
             bullets.remove(bullet)
+
+        for monster in monsters:
+            if bullet.rect.colliderect(monster.hitbox):
+                monsters.remove(monster)
+                bullets.remove(bullet)
 
     for monster in monsters:
         monster.update(delta)
