@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class Ship:
     def __init__(self):
@@ -38,18 +39,42 @@ class Bullet:
         pygame.draw.rect(screen, (255, 255, 0), (self.x, self.y, 50, 10))
 
 
+class Monster:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+        self.speed = 300
+
+        self.image = pygame.image.load('res/monster.png')
+        size_x, size_y = self.image.get_size()
+        self.image = pygame.transform.smoothscale(self.image, (size_x/2.5, size_y/2.5))
+
+    def update(self, delta):
+        self.x -= self.speed * delta
+
+    def draw(self, screen):
+        screen.blit(self.image, (self.x, self.y))
+
+
 screen = pygame.display.set_mode((800, 600))
 
 pygame.display.set_caption('Space Battle!')
 
 ship = Ship()
 bullets = []
+monsters = []
+monster_spawn_time = random.uniform(0.2, 3)
+timer = 0
 
 clock = pygame.time.Clock()
 
 running = True
 while running:
     delta = clock.tick(60) / 1000
+
+    timer += delta
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -75,6 +100,20 @@ while running:
         bullet.draw(screen)
         if bullet.x > 800:
             bullets.remove(bullet)
+
+    for monster in monsters:
+        monster.update(delta)
+        monster.draw(screen)
+        if monster.x < -200:
+            monsters.remove(monster)
+
+    if timer > monster_spawn_time:
+        monster_spawn_time = random.uniform(0.2, 3)
+        timer = 0
+
+        new_monster = Monster(900, random.randint(0, 600))
+        monsters.append(new_monster)
+
 
     pygame.display.flip()
 
