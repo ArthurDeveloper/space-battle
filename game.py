@@ -1,6 +1,8 @@
 import pygame
 import random
 
+pygame.init()
+
 debug_mode = False
 
 class Ship:
@@ -103,7 +105,13 @@ while running:
             elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 ship.direction = 1
 
-            if event.key == pygame.K_RETURN:
+            if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                if player_has_died:
+                    player_has_died = False
+                    monsters.clear()
+                    ship.y = 100
+                    continue
+
                 new_bullet = ship.spawn_bullet()
                 bullets.append(new_bullet)
 
@@ -124,7 +132,10 @@ while running:
             monsters.remove(monster)
 
         if monster.hitbox.colliderect(ship.hitbox):
-            player_has_died = True
+            if player_has_died:
+                monsters.remove(monster)
+            else: 
+                player_has_died = True
 
     if timer > monster_spawn_time and not player_has_died:
         monster_spawn_time = random.uniform(0.2, 3)
@@ -133,10 +144,18 @@ while running:
         new_monster = Monster(900, random.randint(0, 600))
         monsters.append(new_monster)
 
-    #if player_has_died:
-     #   font = pygame.font.SysFont('Arial')
+    if player_has_died:
+        font = pygame.font.SysFont('Arial', 128)
+        
+        you_died_text = font.render('YOU DIED!', 0, (255, 0, 0))
+        text_rect = you_died_text.get_rect()
+        screen.blit(you_died_text, (800/2 - text_rect.w/2, 600/2 - text_rect.h/2 - 150))
 
+        font = pygame.font.SysFont('Arial', 32)
+        restart_instructions_text = font.render('Press Enter or Spacebar to restart', 0, (255, 0, 0))
+        text_rect = restart_instructions_text.get_rect()
+        screen.blit(restart_instructions_text, (800/2 - text_rect.w/2, 600/2 + text_rect.h/2))
 
     pygame.display.flip()
-
+ 
 
